@@ -136,11 +136,6 @@ const { nav } = Astro.props;
     background-clip: text;
     -webkit-text-fill-color: transparent;
   }
-  @media (prefers-reduced-motion: no-preference) {
-    .l2 {
-      animation: name-light 30s ease-in-out infinite alternate;
-    }
-  }
   @keyframes name-light {
     to {
       background-position:
@@ -149,10 +144,27 @@ const { nav } = Astro.props;
     }
   }
 
-  /* Hidden only once the engine has said it will animate (data-motion="on" set before paint);
-     with reduced motion or no script the lines start in place. */
-  :global(html[data-motion='on']:not([data-intro])) .line {
-    transform: translateY(110%);
+  /* The entrance is pure CSS so the name paints with the first frame instead of waiting for the
+     motion script (which put the LCP at 2.1 s): the lines rise from their masks one after the
+     other, and a client-side navigation replays it because the swap brings new elements. With
+     reduced motion there is no animation and the lines are simply in place. */
+  @media (prefers-reduced-motion: no-preference) {
+    .line {
+      animation: line-rise 0.9s var(--ease-out) both;
+    }
+    .l2 {
+      animation:
+        line-rise 0.9s var(--ease-out) 0.12s both,
+        name-light 30s ease-in-out infinite alternate;
+    }
+  }
+  @keyframes line-rise {
+    from {
+      transform: translateY(110%);
+    }
+    to {
+      transform: none;
+    }
   }
 
   .avatar {

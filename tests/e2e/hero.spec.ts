@@ -72,9 +72,8 @@ for (const vp of [
     test('no glyph is clipped by its mask', async ({ page }) => {
       await page.goto('/');
       await page.evaluate(() => document.fonts.ready);
-      await expect(page.locator('html')).toHaveAttribute('data-intro', /run|fallback/);
       await expect
-        .poll(() => page.locator('.hero .line').evaluateAll((els) => els.map((e) => getComputedStyle(e).transform)))
+        .poll(() => page.locator('.hero .line').evaluateAll((els) => els.map((e) => { const t = getComputedStyle(e).transform; return t === 'none' || new DOMMatrix(t).isIdentity ? 'none' : t; })))
         .toEqual(['none', 'none']);
       // Ink box of each line, from the glyph metrics, against the box of the mask that clips it.
       const gaps = await page.evaluate(() =>
@@ -124,12 +123,12 @@ test.describe('reduced motion', () => {
     await page.goto('/', { waitUntil: 'commit' });
     await page.waitForSelector('.hero .l2');
     const state = await page.evaluate(() => ({
-      motion: document.documentElement.dataset.motion ?? null,
+      entrance: [...document.querySelectorAll('.hero .line')].map((e) => getComputedStyle(e).animationName),
       transforms: [...document.querySelectorAll('.hero .line')].map((e) => getComputedStyle(e).transform),
       aurora: [...document.querySelectorAll('.aurora i')].map((e) => getComputedStyle(e).animationName),
       surnameLight: getComputedStyle(document.querySelector('.hero .l2')!).animationName,
     }));
-    expect(state.motion).toBeNull();
+    expect(state.entrance).toEqual(['none', 'none']);
     expect(state.transforms).toEqual(['none', 'none']);
     expect(state.aurora).toEqual(['none', 'none', 'none']);
     expect(state.surnameLight).toBe('none');
@@ -137,13 +136,16 @@ test.describe('reduced motion', () => {
 });
 
 test('with motion the lines rise and end in place', async ({ page }) => {
-  await page.goto('/');
-  await expect(page.locator('html')).toHaveAttribute('data-intro', 'run');
-  // The tween really runs: right after it starts at least one line is still below its mask.
-  const atStart = await page.locator('.hero .line').evaluateAll((els) => els.map((e) => getComputedStyle(e).transform));
+  await page.goto('/', { waitUntil: 'commit' });
+  await page.waitForSelector('.hero .l2');
+  // The CSS entrance really runs: on the first frames at least one line is still below its mask,
+  // with no script involved. A finished fill-mode animation leaves the identity matrix: same as none.
+  const atStart = await page.locator('.hero .line').evaluateAll((els) => els.map((e) => { const t = getComputedStyle(e).transform; return t === 'none' || new DOMMatrix(t).isIdentity ? 'none' : t; }));
   expect(atStart.some((t) => t !== 'none')).toBe(true);
+  const entrance = await page.locator('.hero .line').evaluateAll((els) => els.map((e) => getComputedStyle(e).animationName.split(',')[0].trim()));
+  expect(entrance).toEqual(['line-rise', 'line-rise']);
   await expect
-    .poll(() => page.locator('.hero .line').evaluateAll((els) => els.map((e) => getComputedStyle(e).transform)))
+    .poll(() => page.locator('.hero .line').evaluateAll((els) => els.map((e) => { const t = getComputedStyle(e).transform; return t === 'none' || new DOMMatrix(t).isIdentity ? 'none' : t; })))
     .toEqual(['none', 'none']);
   expect(await page.evaluate(() => getComputedStyle(document.querySelector('.aurora i')!).animationName)).toBe('aurora-drift');
   // The surname is made of the aurora's light, drifting with it.
@@ -151,7 +153,7 @@ test('with motion the lines rise and end in place', async ({ page }) => {
     const cs = getComputedStyle(e);
     return { anim: cs.animationName, clip: cs.backgroundClip || cs.getPropertyValue('-webkit-background-clip'), fill: cs.getPropertyValue('-webkit-text-fill-color') };
   });
-  expect(l2.anim).toBe('name-light');
+  expect(l2.anim).toBe('line-rise, name-light');
   // One value per background layer: every layer is clipped to the letters.
   expect(l2.clip.split(/,\s*/).every((v) => v === 'text')).toBe(true);
   expect(l2.fill).toBe('rgba(0, 0, 0, 0)');

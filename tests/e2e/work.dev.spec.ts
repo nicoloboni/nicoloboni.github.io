@@ -113,7 +113,7 @@ test.describe('at 1440', () => {
 
   test('the card below scales to 0.94 as the next one slides over, following the scroll', async ({ page }) => {
     await page.goto('/');
-    await expect(page.locator('html')).toHaveAttribute('data-intro', 'run');
+    await expect.poll(() => page.evaluate(() => window.__motion?.active)).toBe(1);
     const second = await page.locator('.work .card').nth(1).evaluate((e) => e.getBoundingClientRect().top + scrollY);
     expect(await scaleOf(page, 0)).toBe(1);
     // Halfway through the trigger (next card from viewport bottom to 12% from the top).
@@ -144,7 +144,7 @@ test.describe('at 1440', () => {
     await scrollToY(page, y);
     const before = await scaleOf(page, 0);
     await page.reload();
-    await expect(page.locator('html')).toHaveAttribute('data-intro', 'run');
+    await expect.poll(() => page.evaluate(() => window.__motion?.active)).toBe(1);
     await expect.poll(() => page.evaluate(() => Math.round(scrollY))).toBe(Math.round(y));
     await settle(page);
     const after = await scaleOf(page, 0);

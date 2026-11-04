@@ -43,7 +43,7 @@ test('one motion cycle after navigating forward and back twice', async ({ page }
 
   // Lenis marks <html> while it is alive.
   expect(await page.evaluate(() => document.documentElement.classList.contains('lenis'))).toBe(true);
-  await expect.poll(() => page.locator('.hero .line').evaluateAll((els) => els.map((e) => getComputedStyle(e).transform))).toEqual([
+  await expect.poll(() => page.locator('.hero .line').evaluateAll((els) => els.map((e) => { const t = getComputedStyle(e).transform; return t === 'none' || new DOMMatrix(t).isIdentity ? 'none' : t; }))).toEqual([
     'none',
     'none',
   ]);

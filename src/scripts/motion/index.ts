@@ -1,6 +1,5 @@
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { heroIntro } from './hero';
 import { createSmoothScroll, type SmoothScroll } from './lenis';
 import { stackCards } from './stack';
 
@@ -35,7 +34,6 @@ export function initMotion() {
       if (ctx.conditions?.reduce) return;
       smooth = createSmoothScroll();
       liveLenis++;
-      heroIntro();
       stackCards();
       expose();
       return () => {
