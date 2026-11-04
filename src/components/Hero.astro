@@ -1,0 +1,185 @@
+---
+import { Image } from 'astro:assets';
+import avatar from '../assets/avatar.jpg';
+import Aurora from './Aurora.astro';
+
+interface Props {
+  nav: { href: string; label: string }[];
+}
+
+const { nav } = Astro.props;
+---
+
+<header class="hero">
+  <Aurora />
+  <div class="topbar wrap">
+    <span>Developer &amp; designer</span>
+    {
+      nav.length > 0 && (
+        <nav aria-label="Main">
+          {nav.map((item) => (
+            <a href={item.href}>{item.label}</a>
+          ))}
+        </nav>
+      )
+    }
+  </div>
+  <div class="body wrap">
+    <div class="row">
+      <h1 class="name" aria-label="Nicolò Boni">
+        <span class="mask"><span class="line l1">Nicolò</span></span>
+        <span class="mask"><span class="line l2">Boni</span></span>
+      </h1>
+      <div class="avatar">
+        <Image src={avatar} alt="" widths={[176, 352]} sizes="(min-width: 768px) 11vw, 88px" loading="eager" />
+      </div>
+    </div>
+    <p class="lede">I design and build websites and web apps, and make motion pieces on the side.</p>
+  </div>
+</header>
+
+<style>
+  .hero {
+    position: relative;
+    isolation: isolate;
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+    background: var(--ink);
+    color: var(--paper);
+  }
+  .hero > :not(.aurora) {
+    position: relative;
+    z-index: 1;
+  }
+
+  .topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 24px;
+    padding-block: 22px;
+    font-size: 15px;
+  }
+  .topbar nav {
+    display: flex;
+    gap: 22px;
+  }
+  .topbar a {
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    min-width: 44px;
+  }
+  .topbar a:hover {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+
+  .body {
+    margin-top: auto;
+    padding-bottom: max(6vh, 48px);
+  }
+  .row {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 32px;
+  }
+
+  /* Sized from the measured advance of "Nicolò" (2.657 em in Bricolage 800, opsz 96), so the
+     widest line is 66% of the page on desktop and 98% of the content on a phone, with no
+     script and no layout shift. */
+  .name {
+    font-size: calc(66vw / 2.657);
+    line-height: 0.9;
+  }
+  /* The negative tracking makes the line box narrower than the last glyph's ink: the end padding
+     gives the "ò" its full width back inside the clip. */
+  .mask {
+    display: block;
+    overflow: clip;
+    padding-bottom: 0.04em;
+    padding-inline-end: 0.06em;
+  }
+  .line {
+    display: block;
+    width: max-content;
+  }
+  .l1 {
+    font-weight: 800;
+    font-variation-settings: 'opsz' 96;
+    letter-spacing: -0.03em;
+  }
+  .l2 {
+    font-family: var(--serif);
+    font-weight: 400;
+  }
+
+  /* Hidden only once the engine has said it will animate (data-motion="on" set before paint);
+     with reduced motion or no script the lines start in place. */
+  :global(html[data-motion='on']:not([data-intro])) .line {
+    transform: translateY(110%);
+  }
+
+  .avatar {
+    flex: none;
+    width: clamp(88px, 11vw, 168px);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    border: var(--rule) solid var(--paper);
+    overflow: hidden;
+    margin-bottom: 1.2vw;
+  }
+  .avatar :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .lede {
+    margin-top: 28px;
+    max-width: 26em;
+    color: var(--soft-paper);
+  }
+
+  /* Phone: the name sits low in a tall screen, so the light gathers behind it instead of filling
+     the empty top as a block of colour. */
+  @media (max-width: 767px) {
+    .hero :global(.aurora .b1) {
+      width: 120vw;
+      height: 52vh;
+      left: -40vw;
+      top: 30vh;
+    }
+    .hero :global(.aurora .b2) {
+      width: 110vw;
+      height: 46vh;
+      left: 10vw;
+      top: 44vh;
+    }
+    .hero :global(.aurora .b3) {
+      width: 90vw;
+      height: 40vh;
+      left: 40vw;
+      top: 26vh;
+    }
+    .name {
+      font-size: calc((100vw - 2 * var(--gutter)) * 0.98 / 2.657);
+    }
+    .row {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 20px;
+    }
+    .avatar {
+      order: -1;
+      margin: 0;
+    }
+    .topbar nav {
+      gap: 14px;
+    }
+  }
+</style>

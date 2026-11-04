@@ -1,0 +1,52 @@
+:root {
+  --paper: #ffffff;
+  --ink: #0d1117;
+  --accent: #3662cd;
+  --signal: #dcf704;
+  /* The aurora's middle tone is the blend of the two avatar colours, not a new colour. */
+  --mid: color-mix(in oklab, var(--accent), var(--signal));
+  /* Secondary text, never below 4.5:1: soft-ink ≈ 5.3:1 on paper, soft-paper ≈ 9.9:1 on ink
+     (WCAG 2.x formula on the mixed sRGB values). */
+  --soft-ink: color-mix(in srgb, var(--ink) 62%, var(--paper));
+  --soft-paper: color-mix(in srgb, var(--paper) 72%, var(--ink));
+
+  /* The ink thread: the avatar's outline brought to screen size. */
+  --rule: 3px;
+  --gutter: max(16px, 4vw);
+  --body: 18px;
+  /* At least a third of the screen between sections (bar 7). */
+  --section-gap: 34vh;
+
+  --sans: 'Bricolage Grotesque Variable', 'Bricolage Fallback', system-ui, sans-serif;
+  --serif: 'Instrument Serif', 'Instrument Fallback', Georgia, serif;
+  --mono: ui-monospace, Menlo, monospace;
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (max-width: 767px) {
+  :root {
+    --rule: 2px;
+    --body: 16px;
+  }
+}
+
+/* Fallbacks tuned to the real faces (fontTools on the woff2 files, 2026-11-04) so the swap
+   does not move the layout: Bricolage ≈ Arial at 99.8%, Instrument ≈ Times at 82.4%. */
+@font-face {
+  font-family: 'Bricolage Fallback';
+  src: local('Arial'), local('ArialMT'), local('Helvetica');
+  size-adjust: 99.8%;
+  ascent-override: 93.2%;
+  descent-override: 27.1%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: 'Instrument Fallback';
+  src: local('Times New Roman'), local('TimesNewRomanPSMT'), local('Times');
+  size-adjust: 82.4%;
+  ascent-override: 120.1%;
+  descent-override: 37.6%;
+  line-gap-override: 0%;
+}

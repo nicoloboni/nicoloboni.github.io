@@ -1,0 +1,46 @@
+---
+interface Props {
+  id: string;
+  /** Plain part of the title; `accent` follows it in Instrument Serif. */
+  title: string;
+  accent?: string;
+}
+
+const { id, title, accent } = Astro.props;
+---
+
+<div class="head">
+  <h2 id={id}>{title}{accent && <> <em>{accent}</em></>}</h2>
+  <p><slot /></p>
+</div>
+
+<style>
+  .head {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 24em);
+    /* The description's last line sits on the title's baseline. */
+    align-items: last baseline;
+    gap: 32px;
+    margin-bottom: 8vh;
+  }
+  h2 {
+    font-weight: 800;
+    font-variation-settings: 'opsz' 96;
+    letter-spacing: -0.03em;
+    line-height: 0.92;
+    font-size: clamp(56px, 7.4vw, 128px);
+  }
+  em {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-style: normal;
+    letter-spacing: 0;
+  }
+
+  @media (max-width: 1023px) {
+    .head {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+  }
+</style>

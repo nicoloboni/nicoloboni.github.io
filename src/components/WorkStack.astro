@@ -1,0 +1,112 @@
+---
+import { Image } from 'astro:assets';
+import type { CollectionEntry } from 'astro:content';
+import SectionHead from './SectionHead.astro';
+
+interface Props {
+  projects: CollectionEntry<'projects'>[];
+}
+
+const { projects } = Astro.props;
+const featured = projects.filter((p) => p.data.featured).slice(0, 5);
+
+const KIND: Record<CollectionEntry<'projects'>['data']['category'], string> = {
+  web: 'Website',
+  motion: 'Motion',
+  graphics: 'Graphics',
+  product: 'Product UI',
+};
+---
+
+{
+  featured.length > 0 && (
+    <section class="work wrap" aria-labelledby="work">
+      <SectionHead id="work" title="Selected" accent="work">
+        Company websites I worked on. Each case study says which parts were mine.
+      </SectionHead>
+      <div class="stack">
+        {featured.map((p, i) => (
+          <article class="card" style={`--i: ${i}`}>
+            <div class="inner">
+              <Image src={p.data.cover} alt={p.data.coverAlt} widths={[640, 1280, 1920]} sizes="92vw" />
+              <p class="cap">
+                <span class="title">{p.data.title}</span>
+                <span class="kind">
+                  {KIND[p.data.category]}, {p.data.year}
+                </span>
+              </p>
+            </div>
+          </article>
+        ))}
+      </div>
+      <a class="more" href="/work">
+        <span class="label">All projects</span> <span aria-hidden="true">→</span>
+        <sup>{projects.length}</sup>
+      </a>
+    </section>
+  )
+}
+
+<style>
+  .work {
+    padding-top: var(--section-gap);
+  }
+  .stack {
+    display: grid;
+    gap: 14vh;
+    padding-bottom: 10vh;
+  }
+  /* Sticky only when motion is allowed: with reduced motion the cards are a plain column. */
+  @media (prefers-reduced-motion: no-preference) {
+    .card {
+      position: sticky;
+      top: calc(9vh + var(--i) * 18px);
+    }
+  }
+  .inner {
+    transform-origin: 50% 0;
+    background: var(--paper);
+    padding-bottom: 14px;
+  }
+  /* A pinned card keeps its two caption lines on screen: the image gives way, not the text. */
+  .inner :global(img) {
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    max-height: calc(100svh - 9vh - 18px * var(--i) - 96px);
+    object-fit: cover;
+  }
+  .cap {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-top: 14px;
+    font-size: 15px;
+    line-height: 1.35;
+  }
+  .kind {
+    color: var(--soft-ink);
+  }
+  .more {
+    display: inline-flex;
+    gap: 0.35em;
+    align-items: baseline;
+    min-height: 44px;
+    margin-top: 4vh;
+    font-size: 20px;
+    font-weight: 600;
+    text-decoration: none;
+  }
+  /* Only the words are underlined: on a flex row every item would get its own broken segment. */
+  .more .label {
+    text-decoration: underline;
+    text-decoration-color: var(--accent);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 6px;
+  }
+  /* A flex item ignores vertical-align: lift the count to the top of the line instead. */
+  .more sup {
+    align-self: flex-start;
+    color: var(--accent);
+    font-size: 0.6em;
+  }
+</style>

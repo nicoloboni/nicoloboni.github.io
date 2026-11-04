@@ -1,0 +1,65 @@
+---
+import { ClientRouter } from 'astro:transitions';
+import bricolageLatin from '@fontsource-variable/bricolage-grotesque/files/bricolage-grotesque-latin-opsz-normal.woff2?url';
+import instrumentLatin from '@fontsource/instrument-serif/files/instrument-serif-latin-400-normal.woff2?url';
+import '../styles/base.css';
+
+interface Props {
+  title: string;
+  description: string;
+}
+
+const { title, description } = Astro.props;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <meta name="theme-color" content="#0d1117" />
+    <link rel="preload" href={bricolageLatin} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={instrumentLatin} as="font" type="font/woff2" crossorigin />
+    <script is:inline>
+      // Before first paint: tell the CSS whether the entrance will play, so lines are hidden only
+      // when something is going to reveal them. If the engine never starts, show them anyway.
+      (function () {
+        var html = document.documentElement;
+        if (!matchMedia('(prefers-reduced-motion: no-preference)').matches) return;
+        html.dataset.motion = 'on';
+        setTimeout(function () {
+          if (!html.dataset.intro) html.dataset.intro = 'fallback';
+        }, 2500);
+      })();
+    </script>
+    <ClientRouter />
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <slot />
+  </body>
+</html>
+
+<script>
+  import type { TransitionBeforeSwapEvent } from 'astro:transitions/client';
+  import { destroyMotion, initMotion } from '../scripts/motion';
+
+  document.addEventListener('astro:page-load', initMotion);
+  document.addEventListener('astro:before-swap', (event) => {
+    destroyMotion();
+    // The incoming <html> replaces the root attributes: keep the before-paint motion flag.
+    const { motion } = document.documentElement.dataset;
+    if (motion) (event as TransitionBeforeSwapEvent).newDocument.documentElement.dataset.motion = motion;
+  });
+  document.addEventListener('astro:after-swap', () => {
+    const html = document.documentElement;
+    if (html.dataset.motion !== 'on') return;
+    setTimeout(() => {
+      if (!html.dataset.intro) html.dataset.intro = 'fallback';
+    }, 2500);
+  });
+</script>
