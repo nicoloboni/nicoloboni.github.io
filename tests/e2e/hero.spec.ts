@@ -127,10 +127,12 @@ test.describe('reduced motion', () => {
       motion: document.documentElement.dataset.motion ?? null,
       transforms: [...document.querySelectorAll('.hero .line')].map((e) => getComputedStyle(e).transform),
       aurora: [...document.querySelectorAll('.aurora i')].map((e) => getComputedStyle(e).animationName),
+      surnameLight: getComputedStyle(document.querySelector('.hero .l2')!).animationName,
     }));
     expect(state.motion).toBeNull();
     expect(state.transforms).toEqual(['none', 'none']);
     expect(state.aurora).toEqual(['none', 'none', 'none']);
+    expect(state.surnameLight).toBe('none');
   });
 });
 
@@ -144,4 +146,13 @@ test('with motion the lines rise and end in place', async ({ page }) => {
     .poll(() => page.locator('.hero .line').evaluateAll((els) => els.map((e) => getComputedStyle(e).transform)))
     .toEqual(['none', 'none']);
   expect(await page.evaluate(() => getComputedStyle(document.querySelector('.aurora i')!).animationName)).toBe('aurora-drift');
+  // The surname is made of the aurora's light, drifting with it.
+  const l2 = await page.locator('.hero .l2').evaluate((e) => {
+    const cs = getComputedStyle(e);
+    return { anim: cs.animationName, clip: cs.backgroundClip || cs.getPropertyValue('-webkit-background-clip'), fill: cs.getPropertyValue('-webkit-text-fill-color') };
+  });
+  expect(l2.anim).toBe('name-light');
+  // One value per background layer: every layer is clipped to the letters.
+  expect(l2.clip.split(/,\s*/).every((v) => v === 'text')).toBe(true);
+  expect(l2.fill).toBe('rgba(0, 0, 0, 0)');
 });

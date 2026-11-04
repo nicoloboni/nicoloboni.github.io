@@ -113,9 +113,40 @@ const { nav } = Astro.props;
     font-variation-settings: 'opsz' 96;
     letter-spacing: -0.03em;
   }
+  /* "Boni" is made of the aurora's light: lime and the mid tone drifting over a base of the
+     blue lifted with paper. Pure blue measured 2.1:1 against the blob passing behind it on a
+     phone; the lifted base keeps every letter readable over the real background.
+     The drift moves the light inside the letters, slowly, the other way round to the blobs. */
   .l2 {
     font-family: var(--serif);
     font-weight: 400;
+    color: var(--paper);
+    background-color: color-mix(in oklab, var(--accent), var(--paper) 45%);
+    background-image:
+      radial-gradient(closest-side, var(--signal), transparent),
+      radial-gradient(closest-side, var(--mid), transparent);
+    background-size:
+      70% 120%,
+      90% 140%;
+    background-position:
+      110% 0%,
+      -10% 100%;
+    background-repeat: no-repeat;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .l2 {
+      animation: name-light 30s ease-in-out infinite alternate;
+    }
+  }
+  @keyframes name-light {
+    to {
+      background-position:
+        -20% 100%,
+        120% 0%;
+    }
   }
 
   /* Hidden only once the engine has said it will animate (data-motion="on" set before paint);
@@ -168,6 +199,10 @@ const { nav } = Astro.props;
     }
     .name {
       font-size: calc((100vw - 2 * var(--gutter)) * 0.98 / 2.657);
+    }
+    /* Here the aurora sits right behind the surname: the base lifts further to stay readable. */
+    .l2 {
+      background-color: color-mix(in oklab, var(--accent), var(--paper) 76%);
     }
     .row {
       flex-direction: column;
