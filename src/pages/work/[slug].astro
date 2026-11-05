@@ -23,7 +23,7 @@ const { data } = project;
 const { Content } = await render(project);
 ---
 
-<Base title={`${data.title}, Nicolò Boni`} description={data.summary}>
+<Base title={`${data.title}, Nicolò Boni`} description={data.summary} image={data.cover} imageAlt={data.coverAlt}>
   <PageBar />
   <main id="main">
     <article>
@@ -32,7 +32,7 @@ const { Content } = await render(project);
         <ProjectMeta data={data} />
       </div>
       <div class="cover" transition:name={`cover-${project.id}`}>
-        <Image src={data.cover} alt={data.coverAlt} widths={[640, 1280, 1920, 2560]} sizes="100vw" loading="eager" fetchpriority="high" />
+        <Image src={data.cover} alt={data.coverAlt} widths={[640, 960, 1280, 1920, 2560]} sizes="100vw" loading="eager" fetchpriority="high" />
       </div>
       <div class="prose wrap">
         <p class="summary">{data.summary}</p>
@@ -90,5 +90,20 @@ const { Content } = await render(project);
   }
   .prose :global(p > img) {
     width: 100%;
+  }
+  /* Two phone views on one line of Markdown sit side by side at a phone's size, not stretched
+     across the page. */
+  .prose > :global(p:has(> img + img)) {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: max(16px, 4vw);
+    margin-inline: 0;
+  }
+  .prose :global(p > img + img),
+  .prose :global(p > img:has(+ img)) {
+    width: min(42%, 390px);
+    border-radius: 20px;
+    outline: var(--rule) solid var(--ink);
   }
 </style>

@@ -70,7 +70,9 @@ test('project page: title, year-role-tools row, wide cover, text at most 60 char
   const href = await page.locator('.work .card a').first().getAttribute('href');
   await page.goto(href!);
   await page.evaluate(() => document.fonts.ready);
-  await expect(page.locator('.meta dt')).toHaveText(['Year', 'Kind', 'Role', 'Tools']);
+  // Both case studies link to the live site, so the row ends with it.
+  await expect(page.locator('.meta dt')).toHaveText(['Year', 'Kind', 'Role', 'Tools', 'Live']);
+  await expect(page.locator('.meta dd a')).toHaveAttribute('href', /^https:\/\//);
   const cover = await page.locator('.cover img').boundingBox();
   expect(cover!.width).toBe(1440);
   const longest = await page.evaluate(() => {

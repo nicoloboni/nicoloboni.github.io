@@ -27,4 +27,8 @@ test('skip link is the first tab stop and lands on main', async ({ page }) => {
   await expect(skip).toHaveText('Skip to content');
   await page.keyboard.press('Enter');
   await expect(page).toHaveURL(/#main$/);
+  // The jump really happens (Lenis or the router could swallow it): the page has scrolled past the
+  // hero and main is on screen.
+  await expect.poll(() => page.evaluate(() => scrollY)).toBeGreaterThan(0);
+  await expect(page.locator('main')).toBeInViewport();
 });

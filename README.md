@@ -2,7 +2,7 @@
 
 Personal portfolio of Nicolò Boni, developer and designer. Built with Astro, GSAP and Lenis.
 
-Status: the home page is live (hero, about, footer). The gallery shows from 6 publishable pieces,
+Status: the home page is live (hero, about, footer), with a 404 page and link previews. The gallery shows from 6 publishable pieces,
 the case studies and `/work` from one publishable project. Work made for companies appears only
 after their written consent.
 
@@ -40,6 +40,15 @@ and a dev resync during a build can put pending images into the local dist/.
   (`src/integrations/piece-videos.ts`), so a pending piece's video is never shipped.
 - A `pending` entry and its images are listed in `.git/info/exclude`, so they live only on the
   machine that has them and never reach the public repository.
+- Two Markdown images on one line are shown side by side at phone size: use it for the phone
+  views of a case study.
+
+## Sharing
+
+`src/components/Seo.astro` writes the title, description, canonical URL, Open Graph and X card of
+every page. The card is `src/assets/share.png` (the hero at 1200x630, captured with
+`portfolio-share-card.py` in the brain's portfolio scripts); a project page uses its own cover.
+`public/` holds only `favicon.svg`.
 
 ## Deploy
 

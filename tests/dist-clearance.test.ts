@@ -2,6 +2,7 @@
  * The production build carries no trace of a `pending` entry: no page, no text, no image.
  * Reads dist/ as produced by `pnpm build`: run `pnpm test:clearance`, which builds first.
  */
+import { execFileSync } from 'node:child_process';
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { basename, extname, join } from 'node:path';
 import { describe, expect, it } from 'vitest';
@@ -114,6 +115,14 @@ describe('production build and clearance', () => {
 
   it('every entry has a clearance the schema knows', () => {
     for (const e of all) expect(CLEARANCES, `${e.file.replace(ROOT, '')}`).toContain(e.data.clearance);
+  });
+
+  // The build filters pending entries, so a committed one would pass every check on dist/ while its
+  // text and images sit in the public repository: the repository itself must hold none.
+  it('no pending entry is tracked by git', () => {
+    const tracked = new Set(execFileSync('git', ['ls-files', '-z', 'src/content'], { cwd: ROOT, encoding: 'utf8' }).split('\0').filter(Boolean).map((f) => join(ROOT, f)));
+    const committed = all.filter((e) => e.data.clearance === 'pending' && tracked.has(e.file)).map((e) => e.file.replace(ROOT, ''));
+    expect(committed, 'list them in .git/info/exclude and `git rm --cached` them').toEqual([]);
   });
 
   // Pending entries are git-ignored, so a fresh clone (the CI) has none and checks only the rules

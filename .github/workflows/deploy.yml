@@ -19,13 +19,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      # The build fails, and nothing is deployed, if the types break or dist/ holds a trace of a
-      # pending entry.
+      # The build fails, and nothing is deployed, if the types break, the clearance rules regress,
+      # a pending entry is committed or dist/ holds a trace of one.
       - uses: withastro/action@v6
         with:
           node-version: 24
           package-manager: pnpm@11.1.3
-          build-cmd: pnpm check && pnpm test:clearance
+          build-cmd: pnpm check && pnpm test && pnpm test:clearance
 
   deploy:
     needs: build

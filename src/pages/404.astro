@@ -1,0 +1,75 @@
+---
+import Base from '../layouts/Base.astro';
+import Aurora from '../components/Aurora.astro';
+---
+
+<Base title="Page not found, Nicolò Boni" description="There is no page at this address." noindex>
+  <main id="main" class="lost">
+    <Aurora />
+    <div class="body wrap">
+      <p class="name"><span class="l1">Nicolò</span> <span class="l2">Boni</span></p>
+      <h1>There is no page at this address.</h1>
+      <a href="/">Back to the home page <span aria-hidden="true">→</span></a>
+    </div>
+  </main>
+</Base>
+
+<style>
+  .lost {
+    position: relative;
+    isolation: isolate;
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+    background: var(--ink);
+    color: var(--paper);
+  }
+  .body {
+    position: relative;
+    z-index: 1;
+    margin-top: auto;
+    padding-bottom: max(6vh, 48px);
+  }
+
+  /* The hero's name at a smaller size, from the same measured advance of "Nicolò" (2.657 em). */
+  .name {
+    display: flex;
+    flex-wrap: wrap;
+    column-gap: 0.25em;
+    font-size: calc(44vw / 2.657);
+    line-height: 0.9;
+  }
+  .l1 {
+    font-weight: 800;
+    font-variation-settings: 'opsz' 96;
+    letter-spacing: -0.03em;
+  }
+  .l2 {
+    font-family: var(--serif);
+  }
+
+  h1 {
+    margin-top: 36px;
+    font-size: clamp(22px, 2.4vw, 34px);
+    font-weight: 500;
+    line-height: 1.2;
+  }
+  a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    margin-top: 12px;
+    color: var(--soft-paper);
+    text-underline-offset: 4px;
+  }
+  a:hover {
+    color: var(--paper);
+  }
+
+  @media (max-width: 767px) {
+    .name {
+      flex-direction: column;
+      font-size: calc((100vw - 2 * var(--gutter)) * 0.98 / 2.657);
+    }
+  }
+</style>
