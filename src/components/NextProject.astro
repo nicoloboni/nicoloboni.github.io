@@ -1,0 +1,45 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  project: CollectionEntry<'projects'>;
+}
+
+const { project } = Astro.props;
+---
+
+<nav class="next wrap" aria-label="Next project">
+  <hr class="rule" />
+  <a href={`/work/${project.id}`}>
+    <span class="label">Next project <span aria-hidden="true">→</span></span>
+    <span class="title">{project.data.title}</span>
+  </a>
+</nav>
+
+<style>
+  .next {
+    padding-top: var(--section-gap);
+  }
+  a {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding-top: 6vh;
+    text-decoration: none;
+  }
+  .label {
+    font-size: 15px;
+    color: var(--soft-ink);
+  }
+  .title {
+    font-weight: 800;
+    font-variation-settings: 'opsz' 96;
+    letter-spacing: -0.03em;
+    line-height: 0.92;
+    font-size: clamp(48px, 7.4vw, 128px);
+    text-decoration: underline;
+    text-decoration-color: var(--accent);
+    text-decoration-thickness: var(--rule);
+    text-underline-offset: 0.12em;
+  }
+</style>

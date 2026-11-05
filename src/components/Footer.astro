@@ -1,0 +1,134 @@
+---
+import Aurora from './Aurora.astro';
+
+// Contacts are provisional: the email column waits for Nicolò to choose which address to show.
+const columns = [
+  { title: 'Elsewhere', links: [{ href: 'https://github.com/nicoloboni', label: 'GitHub' }] },
+  { title: 'This site', links: [{ href: 'https://github.com/nicoloboni/nicoloboni.github.io', label: 'Source on GitHub' }], text: ['Built with Astro, GSAP and Lenis'] },
+  { title: 'Set in', text: ['Bricolage Grotesque', 'Instrument Serif'] },
+];
+---
+
+<footer class="footer" id="contact">
+  <Aurora />
+  <div class="top wrap">
+    <hr class="rule" />
+    <div class="cols">
+      {
+        columns.map((c) => (
+          <div>
+            <h2>{c.title}</h2>
+            <ul>
+              {c.links?.map((l) => (
+                <li>
+                  <a href={l.href}>{l.label}</a>
+                </li>
+              ))}
+              {c.text?.map((t) => (
+                <li>{t}</li>
+              ))}
+            </ul>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+  <!-- The name again, as a closing sign: the page's h1 already says it to screen readers. -->
+  <p class="bigname" aria-hidden="true"><span class="fit"><span class="w1">Nicolò</span> <span class="w2">Boni</span></span></p>
+</footer>
+
+<style>
+  .footer {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    margin-top: var(--section-gap);
+    background: var(--ink);
+    color: var(--paper);
+  }
+  .footer > :not(.aurora) {
+    position: relative;
+    z-index: 1;
+  }
+  /* The light gathers low, behind the name, and leaves the small text on plain ink. It peaks at
+     0.8: at full strength the lime blob put "Boni" at 4.2:1 (portfolio-contrasto.py --bottom). */
+  .footer :global(.aurora) {
+    top: auto;
+    bottom: -30%;
+    height: 120%;
+    opacity: 0.8;
+  }
+  .footer :global(.aurora .b1) {
+    top: 30%;
+  }
+  .footer :global(.aurora .b2) {
+    top: 40%;
+  }
+  .footer :global(.aurora .b3) {
+    top: 55%;
+  }
+
+  .top {
+    padding-top: 12vh;
+  }
+  .rule {
+    background: var(--paper);
+  }
+  .cols {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 24px;
+    padding-block: 5vh 6vh;
+    font-size: 15px;
+  }
+  h2 {
+    margin-bottom: 10px;
+    font: 500 12px / 1.4 var(--mono);
+    letter-spacing: 0.02em;
+    color: var(--signal);
+  }
+  ul {
+    list-style: none;
+  }
+  li + li {
+    margin-top: 2px;
+  }
+  a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    text-decoration: underline;
+    text-decoration-color: var(--signal);
+    text-underline-offset: 4px;
+  }
+
+  /* Edge to edge: the line is sized from its own measured advance (4.467 em: "Nicolò" in
+     Bricolage 800 at opsz 96, a space, "Boni" in Instrument Serif) against the width of its box,
+     so no script fits it and nothing shifts. */
+  .bigname {
+    container-type: inline-size;
+    padding: 2vh 1.5vw 3vh;
+  }
+  .fit {
+    display: block;
+    width: max-content;
+    font-size: calc(100cqw / 4.467);
+    line-height: 0.82;
+    white-space: nowrap;
+  }
+  .w1 {
+    font-weight: 800;
+    font-variation-settings: 'opsz' 96;
+    letter-spacing: -0.035em;
+  }
+  .w2 {
+    font-family: var(--serif);
+  }
+
+  @media (max-width: 767px) {
+    .cols {
+      grid-template-columns: 1fr 1fr;
+      row-gap: 32px;
+    }
+  }
+</style>

@@ -1,9 +1,13 @@
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { SplitText } from 'gsap/SplitText';
+import { riseFooter } from './footer';
 import { createSmoothScroll, type SmoothScroll } from './lenis';
+import { revealLines } from './lines';
+import { playVideosInView, slideRibbons } from './ribbons';
 import { stackCards } from './stack';
 
-gsap.registerPlugin(ScrollTrigger);
+gsap.registerPlugin(ScrollTrigger, SplitText);
 
 let mm: gsap.MatchMedia | null = null;
 let smooth: SmoothScroll | null = null;
@@ -35,8 +39,12 @@ export function initMotion() {
       smooth = createSmoothScroll();
       liveLenis++;
       stackCards();
+      revealLines();
+      riseFooter();
+      const stopVideos = playVideosInView();
       expose();
       return () => {
+        stopVideos();
         smooth?.destroy();
         smooth = null;
         liveLenis--;
@@ -44,6 +52,11 @@ export function initMotion() {
       };
     },
   );
+  // The ribbons slide only on desktop; on a phone they are columns that scroll on their own.
+  mm.add('(prefers-reduced-motion: no-preference) and (min-width: 768px)', () => {
+    slideRibbons();
+    expose();
+  });
   expose();
 }
 

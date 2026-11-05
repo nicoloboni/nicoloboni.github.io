@@ -1,0 +1,94 @@
+---
+import { Image } from 'astro:assets';
+import { render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import PageBar from '../../components/PageBar.astro';
+import ProjectMeta from '../../components/ProjectMeta.astro';
+import NextProject from '../../components/NextProject.astro';
+import Footer from '../../components/Footer.astro';
+import { visibleProjects } from '../../lib/visibility';
+
+export async function getStaticPaths() {
+  const projects = await visibleProjects();
+  // The next project comes from the visible index, never from a reference(): a link to a
+  // pending entry would break the production build or, worse, pull it in.
+  return projects.map((project, i) => ({
+    params: { slug: project.id },
+    props: { project, next: projects.length > 1 ? projects[(i + 1) % projects.length] : undefined },
+  }));
+}
+
+const { project, next } = Astro.props;
+const { data } = project;
+const { Content } = await render(project);
+---
+
+<Base title={`${data.title}, Nicolò Boni`} description={data.summary}>
+  <PageBar />
+  <main id="main">
+    <article>
+      <div class="intro wrap">
+        <h1>{data.title}</h1>
+        <ProjectMeta data={data} />
+      </div>
+      <div class="cover" transition:name={`cover-${project.id}`}>
+        <Image src={data.cover} alt={data.coverAlt} widths={[640, 1280, 1920, 2560]} sizes="100vw" loading="eager" fetchpriority="high" />
+      </div>
+      <div class="prose wrap">
+        <p class="summary">{data.summary}</p>
+        <Content />
+      </div>
+    </article>
+    {next && <NextProject project={next} />}
+  </main>
+  <Footer />
+</Base>
+
+<style>
+  .intro {
+    display: grid;
+    gap: 5vh;
+    padding-block: 14vh 6vh;
+  }
+  h1 {
+    font-weight: 800;
+    font-variation-settings: 'opsz' 96;
+    letter-spacing: -0.03em;
+    line-height: 0.92;
+    font-size: clamp(56px, 9vw, 160px);
+  }
+  .cover :global(img) {
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+  }
+
+  /* Text in one narrow column (at most 60 characters a line), images across the whole page. */
+  .prose {
+    padding-top: 10vh;
+  }
+  .prose > :global(*) {
+    max-width: 27em;
+    margin-inline: auto;
+  }
+  .prose > :global(* + *) {
+    margin-top: 1em;
+  }
+  .prose :global(h2) {
+    margin-top: 2.4em;
+    font-size: 1em;
+    font-weight: 700;
+  }
+  .summary {
+    font-size: clamp(20px, 1.7vw, 26px);
+    line-height: 1.4;
+  }
+  .prose > :global(p:has(> img)) {
+    max-width: none;
+    margin-block: 10vh;
+    margin-inline: calc(-1 * var(--gutter));
+  }
+  .prose :global(p > img) {
+    width: 100%;
+  }
+</style>

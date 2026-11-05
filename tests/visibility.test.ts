@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { CLEARANCES, THRESHOLDS, byOrder, filterPublishable, galleryRibbons, isPublishable, type Clearance } from '../src/lib/visibility-rules';
+import { referencedVideos } from '../src/lib/piece-video';
 
 const project = (id: string, clearance: Clearance, order = 0) => ({ id, data: { clearance, order } });
 const piece = (id: string, ribbon: string) => ({ id, data: { ribbon } });
@@ -36,6 +37,18 @@ describe('filterPublishable', () => {
 
   it('sorts by order', () => {
     expect([...all].sort(byOrder).map((p) => p.id)).toEqual(['c', 'a', 'b']);
+  });
+});
+
+describe('referencedVideos', () => {
+  it('finds each piece video a page points to, once, and nothing else', () => {
+    const html = `<video poster="/_astro/a.webp"><source src="/media/pieces/loop-1/loop-1.mp4"></video>
+      <a href="/media/pieces/loop-1/loop-1.mp4">again</a><source src="/media/pieces/b/b.webm">
+      <img src="/media/pieces/c/c.png"><source src="/media/pieces/../x.mp4">`;
+    expect(referencedVideos(html)).toEqual([
+      { id: 'loop-1', file: 'loop-1.mp4' },
+      { id: 'b', file: 'b.webm' },
+    ]);
   });
 });
 

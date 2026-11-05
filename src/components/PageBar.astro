@@ -1,0 +1,39 @@
+---
+/** Top bar of the inner pages: the way home and to the index. */
+---
+
+<header class="bar wrap">
+  <a href="/">Nicolò Boni</a>
+  <nav aria-label="Main">
+    <a href="/work">All projects</a>
+    <a href="#contact">Contact</a>
+  </nav>
+</header>
+
+<style>
+  .bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 24px;
+    padding-block: 12px;
+    font-size: 15px;
+  }
+  nav {
+    display: flex;
+    gap: 22px;
+  }
+  a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    text-decoration: none;
+  }
+  a:hover {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+  .bar > a {
+    font-weight: 700;
+  }
+</style>

@@ -125,7 +125,7 @@ test.describe('reduced motion', () => {
     const state = await page.evaluate(() => ({
       entrance: [...document.querySelectorAll('.hero .line')].map((e) => getComputedStyle(e).animationName),
       transforms: [...document.querySelectorAll('.hero .line')].map((e) => getComputedStyle(e).transform),
-      aurora: [...document.querySelectorAll('.aurora i')].map((e) => getComputedStyle(e).animationName),
+      aurora: [...document.querySelectorAll('.hero .aurora i')].map((e) => getComputedStyle(e).animationName),
       surnameLight: getComputedStyle(document.querySelector('.hero .l2')!).animationName,
     }));
     expect(state.entrance).toEqual(['none', 'none']);

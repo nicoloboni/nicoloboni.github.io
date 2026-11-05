@@ -1,0 +1,102 @@
+---
+import SectionHead from './SectionHead.astro';
+
+// Provisional copy, to be confirmed by Nicolò (the spec's «Signs of AI writing» check does not
+// exist in the design kit). At most 90 words in all, at most 12 pills.
+const paragraphs = [
+  'I am a developer in a small team that builds web apps in Elixir, Phoenix and Ash, and company websites in Astro. More and more of my days go to the design side too: layouts, motion and brand pieces.',
+  'In my own time I make posters, short animations and 3D scenes in Blender, mostly to learn how things move. This site is one of those experiments.',
+];
+const stack = ['Elixir', 'Phoenix', 'Ash', 'Astro', 'TypeScript', 'GSAP', 'Figma', 'Blender', 'Higgsfield'];
+---
+
+<section class="about wrap" aria-labelledby="about">
+  <hr class="rule" />
+  <SectionHead id="about" title="About">What I build at work, what I make on the side, and the tools I use for both.</SectionHead>
+  <div class="grid">
+    <div class="copy">
+      {
+        paragraphs.map((text) => (
+          <p>
+            {/* Screen readers get the sentence whole; the visible copy is split into lines by
+                the motion engine, so it stays out of the accessibility tree. */}
+            <span class="visually-hidden">{text}</span>
+            <span class="lines" data-lines aria-hidden="true">
+              {text}
+            </span>
+          </p>
+        ))
+      }
+      <ul class="pills" aria-label="Stack">
+        {stack.map((s) => <li>{s}</li>)}
+      </ul>
+    </div>
+  </div>
+</section>
+
+<style>
+  .about {
+    padding-top: var(--section-gap);
+  }
+  .rule {
+    margin-bottom: 6vh;
+  }
+  /* The thread draws itself from the left as it enters the screen: CSS only, where supported. */
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .rule {
+        transform-origin: 0 50%;
+        animation: rule-draw linear both;
+      }
+      /* Kept in a rule of its own: in one block the minifier folds view() into the `animation`
+         shorthand, which browsers reject, and the thread never moved. */
+      .about .rule {
+        animation-timeline: view();
+        animation-range: entry 0% entry 100%;
+      }
+    }
+  }
+  @keyframes rule-draw {
+    from {
+      transform: scaleX(0);
+    }
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 34em);
+  }
+  .copy {
+    grid-column: 2;
+    font-size: clamp(20px, 1.7vw, 26px);
+    line-height: 1.4;
+  }
+  .copy p + p {
+    margin-top: 1em;
+  }
+  .lines {
+    display: block;
+  }
+  .pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 36px;
+    list-style: none;
+  }
+  .pills li {
+    border: var(--rule) solid var(--ink);
+    border-radius: 999px;
+    padding: 6px 16px;
+    font-size: 15px;
+  }
+
+  @media (max-width: 1023px) {
+    .grid {
+      grid-template-columns: 1fr;
+    }
+    .copy {
+      grid-column: 1;
+    }
+  }
+</style>

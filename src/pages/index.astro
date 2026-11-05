@@ -2,16 +2,23 @@
 import Base from '../layouts/Base.astro';
 import Hero from '../components/Hero.astro';
 import WorkStack from '../components/WorkStack.astro';
-import { visibleProjects } from '../lib/visibility';
+import Gallery from '../components/Gallery.astro';
+import About from '../components/About.astro';
+import Footer from '../components/Footer.astro';
+import { visiblePieces, visibleProjects } from '../lib/visibility';
 
 const projects = await visibleProjects();
+const ribbons = await visiblePieces();
 const hasWork = projects.some((p) => p.data.featured);
-const nav = hasWork ? [{ href: '#work', label: 'Work' }] : [];
+const nav = [...(hasWork ? [{ href: '#work', label: 'Work' }] : []), { href: '#about', label: 'About' }, { href: '#contact', label: 'Contact' }];
 ---
 
 <Base title="Nicolò Boni, developer and designer" description="Nicolò Boni designs and builds websites and web apps, and makes motion pieces on the side.">
   <Hero nav={nav} />
   <main id="main">
     <WorkStack projects={projects} />
+    <Gallery ribbons={ribbons} />
+    <About />
   </main>
+  <Footer />
 </Base>

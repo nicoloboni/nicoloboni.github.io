@@ -1,0 +1,112 @@
+---
+import { Image } from 'astro:assets';
+import Base from '../../layouts/Base.astro';
+import PageBar from '../../components/PageBar.astro';
+import SectionHead from '../../components/SectionHead.astro';
+import Footer from '../../components/Footer.astro';
+import { visibleProjects } from '../../lib/visibility';
+import { CATEGORY_TITLES } from '../../lib/kinds';
+
+// /work, built only when at least one project is visible: with every project pending the page
+// does not exist at all, instead of being an empty list. A rest parameter is the one way to let
+// a static route opt out (an index.astro is always built); [slug].astro still wins on /work/<id>.
+export async function getStaticPaths() {
+  const projects = await visibleProjects();
+  return projects.length > 0 ? [{ params: { index: undefined } }] : [];
+}
+
+const projects = await visibleProjects();
+const groups = CATEGORY_TITLES.map(([category, title]) => ({ category, title, items: projects.filter((p) => p.data.category === category) })).filter((g) => g.items.length > 0);
+---
+
+<Base title="All projects, Nicolò Boni" description="Every case study by Nicolò Boni, grouped by kind of work.">
+  <PageBar />
+  <main id="main" class="wrap">
+    <div class="head">
+      <SectionHead id="all" title="All" accent="projects" level="h1">
+        Every case study on this site, grouped by the kind of work. Each one says which parts were mine.
+      </SectionHead>
+    </div>
+    {
+      groups.map((g) => (
+        <section class="group" aria-labelledby={`k-${g.category}`}>
+          <h2 id={`k-${g.category}`}>
+            {g.title} <sup>{g.items.length}</sup>
+          </h2>
+          <ul>
+            {g.items.map((p) => (
+              <li>
+                <a href={`/work/${p.id}`}>
+                  <div class="cover" transition:name={`cover-${p.id}`}>
+                    <Image src={p.data.cover} alt={p.data.coverAlt} widths={[480, 960, 1440]} sizes="(min-width: 768px) 46vw, 92vw" />
+                  </div>
+                  <span class="title">{p.data.title}</span>
+                  <span class="year">{p.data.year}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))
+    }
+  </main>
+  <Footer />
+</Base>
+
+<style>
+  .head {
+    padding-top: 14vh;
+  }
+  .group + .group {
+    margin-top: 14vh;
+  }
+  .group {
+    border-top: var(--rule) solid var(--ink);
+    padding-top: 24px;
+  }
+  h2 {
+    margin-bottom: 32px;
+    font-size: 20px;
+    font-weight: 700;
+  }
+  sup {
+    color: var(--accent);
+    font-size: 0.6em;
+  }
+  ul {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8vh 24px;
+    list-style: none;
+  }
+  a {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: 15px;
+    line-height: 1.35;
+    text-decoration: none;
+  }
+  a:hover .title {
+    text-decoration: underline;
+    text-decoration-color: var(--accent);
+    text-underline-offset: 4px;
+  }
+  .cover {
+    margin-bottom: 12px;
+  }
+  .cover :global(img) {
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+  }
+  .year {
+    color: var(--soft-ink);
+  }
+
+  @media (max-width: 767px) {
+    ul {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

@@ -30,8 +30,10 @@ test('one motion cycle after navigating forward and back twice', async ({ page }
   const errors: string[] = [];
   page.on('pageerror', (e) => errors.push(String(e)));
   await page.goto('/');
-  // One scroll trigger per card that gets covered by the next one.
-  const triggers = Math.max(0, (await page.locator('.work .card').count()) - 1);
+  // One scroll trigger per card that gets covered by the next one, per gallery ribbon (desktop),
+  // per About paragraph split into lines, and one for the footer.
+  const cards = await page.locator('.work .card').count();
+  const triggers = Math.max(0, cards - 1) + (await page.locator('.gallery .ribbon').count()) + (await page.locator('[data-lines]').count()) + 1;
   await expect.poll(() => probe(page)).toEqual({ active: 1, inits: 1, lenis: 1, triggers });
 
   await softNavigate(page, '/?n=1');

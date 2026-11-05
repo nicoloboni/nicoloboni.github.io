@@ -1,0 +1,36 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import type { RibbonGroup } from '../lib/visibility';
+import SectionHead from './SectionHead.astro';
+import Ribbon from './Ribbon.astro';
+
+interface Props {
+  /** Already filtered by visiblePieces(): empty when there are not enough pieces to show. */
+  ribbons: RibbonGroup<CollectionEntry<'pieces'>>[];
+}
+
+const { ribbons } = Astro.props;
+---
+
+{
+  ribbons.length > 0 && (
+    <section class="gallery" aria-labelledby="gallery">
+      <div class="wrap">
+        <SectionHead id="gallery" title="Motion" accent="& graphics">
+          Posters, social pieces and AI animations, made in my own time.
+        </SectionHead>
+      </div>
+      {ribbons.map((r, i) => (
+        <Ribbon name={r.name} pieces={r.pieces} dir={i % 2 === 0 ? 1 : -1} />
+      ))}
+    </section>
+  )
+}
+
+<style>
+  .gallery {
+    padding-top: var(--section-gap);
+    /* The tracks run past both edges on desktop and slide into view with the scroll. */
+    overflow-x: clip;
+  }
+</style>

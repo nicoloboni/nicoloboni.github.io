@@ -4,13 +4,16 @@ interface Props {
   /** Plain part of the title; `accent` follows it in Instrument Serif. */
   title: string;
   accent?: string;
+  /** h1 on a page whose head this is (the /work index), h2 for a section of the home. */
+  level?: 'h1' | 'h2';
 }
 
-const { id, title, accent } = Astro.props;
+const { id, title, accent, level = 'h2' } = Astro.props;
+const Heading = level;
 ---
 
 <div class="head">
-  <h2 id={id}>{title}{accent && <> <em>{accent}</em></>}</h2>
+  <Heading id={id} class="title">{title}{accent && <> <em>{accent}</em></>}</Heading>
   <p><slot /></p>
 </div>
 
@@ -23,7 +26,7 @@ const { id, title, accent } = Astro.props;
     gap: 32px;
     margin-bottom: 8vh;
   }
-  h2 {
+  .title {
     font-weight: 800;
     font-variation-settings: 'opsz' 96;
     letter-spacing: -0.03em;

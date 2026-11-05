@@ -7,6 +7,7 @@ import { basename, extname, join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { parse } from 'yaml';
 import { CLEARANCES } from '../src/lib/visibility-rules';
+import { VIDEO_ROUTE, referencedVideos } from '../src/lib/piece-video';
 
 const ROOT = new URL('..', import.meta.url).pathname;
 const DIST = join(ROOT, 'dist');
@@ -81,13 +82,34 @@ describe('production build and clearance', () => {
   it('has a build to inspect, newer than the content and the rules', () => {
     expect(files.length, 'run `pnpm test:clearance` (it builds first)').toBeGreaterThan(0);
     const built = statSync(join(DIST, 'index.html')).mtimeMs;
-    const sources = [...walk(join(ROOT, 'src/content')), ...walk(join(ROOT, 'src/assets')), ...walk(join(ROOT, 'src/lib')), join(ROOT, 'src/content.config.ts')];
+    const sources = [...['content', 'assets', 'lib', 'pages', 'components', 'integrations'].flatMap((d) => walk(join(ROOT, 'src', d))), join(ROOT, 'src/content.config.ts')];
     const stale = sources.filter((s) => statSync(s).mtimeMs > built).map((s) => s.replace(ROOT, ''));
     expect(stale, 'dist/ is older than these files: rebuild').toEqual([]);
   });
 
   it('can find text in the build (control: the hero name is there)', () => {
     expect(bytes.some(({ b }) => b.includes(Buffer.from('Nicolò')))).toBe(true);
+  });
+
+  // Media reach the build only through the content layer (images) or the piece-videos
+  // integration (videos a built page points to): public/ is copied whole, with no clearance check.
+  it('public/ holds no image or video', () => {
+    const media = walk(join(ROOT, 'public')).filter((f) => /\.(?:png|jpe?g|webp|avif|gif|mp4|webm|mov)$/i.test(f));
+    expect(media.map((f) => f.replace(ROOT, ''))).toEqual([]);
+  });
+
+  it('every video in the build is one a built page points to', () => {
+    const html = bytes.filter(({ f }) => f.endsWith('.html')).map(({ b }) => b.toString('utf8'));
+    const referenced = new Set(html.flatMap((h) => referencedVideos(h)).map((v) => `dist${VIDEO_ROUTE}/${v.id}/${v.file}`));
+    const videos = files.map((f) => f.replace(DIST, 'dist')).filter((f) => /\.(?:mp4|webm|mov)$/i.test(f));
+    console.log(`videos in the build: ${videos.length}`);
+    expect(videos.filter((v) => !referenced.has(v))).toEqual([]);
+  });
+
+  it('no /work pages when every project is pending', () => {
+    const shown = all.filter((e) => e.collection === 'projects' && e.data.clearance !== 'pending');
+    if (shown.length > 0) return;
+    expect(files.filter((f) => f.replace(DIST, '').startsWith('/work')).map((f) => f.replace(DIST, 'dist'))).toEqual([]);
   });
 
   it('every entry has a clearance the schema knows', () => {

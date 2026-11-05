@@ -54,7 +54,8 @@ const pieces = defineCollection({
       category: z.enum(['motion', 'graphics']),
       media: z.discriminatedUnion('kind', [
         z.object({ kind: z.literal('image'), src: image(), alt: z.string().min(1) }),
-        z.object({ kind: z.literal('video'), src: z.string().regex(/\.(mp4|webm)$/), poster: image(), alt: z.string().min(1) }),
+        // A bare file name in src/assets/pieces/<id>/: see src/lib/piece-video.ts for how it ships.
+        z.object({ kind: z.literal('video'), src: z.string().regex(/^[\w-]+\.(mp4|webm)$/), poster: image(), alt: z.string().min(1) }),
       ]),
       ribbon: z.string(),
       // Pieces made for a brand (social, ads) need the same written consent as projects.

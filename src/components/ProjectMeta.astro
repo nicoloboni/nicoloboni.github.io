@@ -1,0 +1,61 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { KIND } from '../lib/kinds';
+
+interface Props {
+  data: CollectionEntry<'projects'>['data'];
+}
+
+const { data } = Astro.props;
+const rows = [
+  { term: 'Year', value: String(data.year) },
+  { term: 'Kind', value: KIND[data.category] },
+  { term: 'Role', value: data.role },
+  { term: 'Tools', value: data.tools.join(', ') },
+];
+---
+
+<dl class="meta">
+  {
+    rows.map((r) => (
+      <div>
+        <dt>{r.term}</dt>
+        <dd>{r.value}</dd>
+      </div>
+    ))
+  }
+  {
+    data.link && (
+      <div>
+        <dt>Live</dt>
+        <dd>
+          <a href={data.link}>{new URL(data.link).host}</a>
+        </dd>
+      </div>
+    )
+  }
+</dl>
+
+<style>
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px 48px;
+    font-size: 15px;
+    line-height: 1.35;
+  }
+  dt {
+    color: var(--soft-ink);
+  }
+  dd {
+    margin: 0;
+  }
+  a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    text-decoration-color: var(--accent);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 4px;
+  }
+</style>

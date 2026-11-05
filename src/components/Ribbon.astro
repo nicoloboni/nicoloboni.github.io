@@ -1,0 +1,124 @@
+---
+import { Image, getImage } from 'astro:assets';
+import type { CollectionEntry } from 'astro:content';
+import { pieceVideoUrl } from '../lib/piece-video';
+
+interface Props {
+  name: string;
+  pieces: CollectionEntry<'pieces'>[];
+  /** 1 slides left as the page scrolls down, -1 slides right. */
+  dir: 1 | -1;
+}
+
+const { name, pieces, dir } = Astro.props;
+
+const tiles = await Promise.all(
+  pieces.map(async (p) => {
+    const m = p.data.media;
+    if (m.kind === 'image') return { p, image: m };
+    const poster = await getImage({ src: m.poster, width: Math.min(m.poster.width, 1280), format: 'webp' });
+    return { p, video: { src: pieceVideoUrl(p.id, m.src), poster: poster.src, width: m.poster.width, height: m.poster.height, alt: m.alt } };
+  }),
+);
+---
+
+<div class="ribbon" data-dir={dir}>
+  <div class="label">
+    <h3>{name}</h3>
+    <span>{String(pieces.length).padStart(2, '0')} pieces</span>
+  </div>
+  <div class="track">
+    {
+      tiles.map(({ p, image, video }) => (
+        <figure class="tile">
+          {image && <Image src={image.src} alt={image.alt} widths={[480, 960, 1440]} sizes="(min-width: 768px) 680px, 92vw" />}
+          {video && (
+            <>
+              {/* Never autoplays on its own: the motion engine plays it while on screen, so
+                  without script or with reduced motion it rests on the poster. */}
+              <video muted playsinline loop preload="none" poster={video.poster} width={video.width} height={video.height} aria-hidden="true">
+                <source src={video.src} type={video.src.endsWith('.webm') ? 'video/webm' : 'video/mp4'} />
+              </video>
+              <span class="visually-hidden">{video.alt}</span>
+            </>
+          )}
+          <figcaption>
+            {p.data.title}, {p.data.year}
+          </figcaption>
+        </figure>
+      ))
+    }
+  </div>
+</div>
+
+<style>
+  .ribbon + .ribbon {
+    margin-top: 7vh;
+  }
+  .label {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 16px;
+    padding-inline: var(--gutter);
+    margin-bottom: 16px;
+    font-size: 15px;
+  }
+  h3 {
+    font: inherit;
+    font-weight: 700;
+  }
+  .track {
+    display: flex;
+    gap: 18px;
+    width: max-content;
+    padding-inline: var(--gutter);
+  }
+  .tile {
+    flex: none;
+  }
+  .tile :is(img, video) {
+    height: clamp(220px, 34vh, 380px);
+    width: auto;
+    max-width: none;
+  }
+  figcaption {
+    margin-top: 8px;
+    font-size: 13px;
+    color: var(--soft-ink);
+  }
+
+  /* Without motion nothing slides, so every piece must already be reachable: the ribbon wraps. */
+  @media (prefers-reduced-motion: reduce) and (min-width: 768px) {
+    .track {
+      width: auto;
+      flex-wrap: wrap;
+      row-gap: 32px;
+    }
+  }
+
+  /* Phone: a ribbon is a column of full-width pieces, its name held at the top while the column
+     is on screen. */
+  @media (max-width: 767px) {
+    .ribbon + .ribbon {
+      margin-top: 10vh;
+    }
+    .label {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      margin-bottom: 0;
+      padding-block: 12px;
+      background: var(--paper);
+    }
+    .track {
+      flex-direction: column;
+      width: auto;
+      gap: 28px;
+    }
+    .tile :is(img, video) {
+      width: 100%;
+      height: auto;
+    }
+  }
+</style>

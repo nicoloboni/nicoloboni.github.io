@@ -2,6 +2,7 @@
 import { Image } from 'astro:assets';
 import type { CollectionEntry } from 'astro:content';
 import SectionHead from './SectionHead.astro';
+import { KIND } from '../lib/kinds';
 
 interface Props {
   projects: CollectionEntry<'projects'>[];
@@ -9,13 +10,6 @@ interface Props {
 
 const { projects } = Astro.props;
 const featured = projects.filter((p) => p.data.featured).slice(0, 5);
-
-const KIND: Record<CollectionEntry<'projects'>['data']['category'], string> = {
-  web: 'Website',
-  motion: 'Motion',
-  graphics: 'Graphics',
-  product: 'Product UI',
-};
 ---
 
 {
@@ -28,13 +22,18 @@ const KIND: Record<CollectionEntry<'projects'>['data']['category'], string> = {
         {featured.map((p, i) => (
           <article class="card" style={`--i: ${i}`}>
             <div class="inner">
-              <Image src={p.data.cover} alt={p.data.coverAlt} widths={[640, 1280, 1920]} sizes="92vw" />
-              <p class="cap">
-                <span class="title">{p.data.title}</span>
-                <span class="kind">
-                  {KIND[p.data.category]}, {p.data.year}
-                </span>
-              </p>
+              <a href={`/work/${p.id}`}>
+                {/* The cover grows into the project page's cover on navigation. */}
+                <div class="cover" transition:name={`cover-${p.id}`}>
+                  <Image src={p.data.cover} alt={p.data.coverAlt} widths={[640, 1280, 1920]} sizes="92vw" />
+                </div>
+                <p class="cap">
+                  <span class="title">{p.data.title}</span>
+                  <span class="kind">
+                    {KIND[p.data.category]}, {p.data.year}
+                  </span>
+                </p>
+              </a>
             </div>
           </article>
         ))}
@@ -85,6 +84,15 @@ const KIND: Record<CollectionEntry<'projects'>['data']['category'], string> = {
   }
   .kind {
     color: var(--soft-ink);
+  }
+  .inner a {
+    display: block;
+    text-decoration: none;
+  }
+  .inner a:hover .title {
+    text-decoration: underline;
+    text-decoration-color: var(--accent);
+    text-underline-offset: 4px;
   }
   .more {
     display: inline-flex;
